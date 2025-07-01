@@ -1,19 +1,19 @@
-# Práctica: Consultas Avanzadas y Relaciones en MongoDB
+# Gestión de Consultas y Relaciones en MongoDB con Node.js y Docker
 
 ## Portada
 
-**Título del proyecto:** Consultas Avanzadas y Relaciones entre Colecciones en MongoDB usando Mongoose y Docker
-**Nombre del estudiante:** Jhonson Benigno Mendoza Jaramillo
-**Carrera / Curso:** Aplicaciones Distribuidas
-**Fecha de entrega:** Julio 2025
+**Título del proyecto:** Desarrollo de Consultas Avanzadas y Relaciones en MongoDB usando Node.js y Docker Compose
+**Nombre completo del estudiante:** Jhonson Benigno Mendoza Jaramillo
+**Carrera / Curso:** Aplicaciones Distribuidas – Sexto Semestre
+**Fecha de entrega:** 01 de julio del 2025
 
 ---
 
 ## Introducción
 
-La presente práctica tiene como propósito explorar y dominar el uso de consultas avanzadas y relaciones entre colecciones en bases de datos NoSQL, específicamente MongoDB, apoyándonos en la herramienta Mongoose y contenedores Docker. En un mundo donde los sistemas distribuidos y las aplicaciones en la nube son el estándar, es vital comprender cómo manejar datos complejos de manera eficiente y flexible. MongoDB, como base de datos orientada a documentos, nos brinda una arquitectura poderosa que facilita el desarrollo ágil de aplicaciones escalables.
+En el contexto actual de desarrollo de software, la gestión de datos juega un papel crucial. Esta práctica tiene como finalidad introducir y afianzar los conocimientos sobre el uso de bases de datos NoSQL, particularmente MongoDB, enfocándose en el diseño de modelos de datos, consultas avanzadas y relaciones entre colecciones. La actividad está dirigida a fortalecer la capacidad de estructurar datos de forma eficiente, usando herramientas modernas como Docker y librerías como Mongoose, en un entorno de desarrollo profesional.
 
-Esta experiencia de laboratorio permite al estudiante no solo comprender la estructura de datos en MongoDB, sino también aplicar operaciones fundamentales como filtrado, agregación y modelado de relaciones entre entidades, ya sea de forma referenciada o embebida, aspectos esenciales para un backend robusto y bien diseñado.
+MongoDB, al ser una base de datos orientada a documentos, permite una alta flexibilidad a la hora de representar información compleja, lo cual lo hace ideal para proyectos en constante evolución. A través de esta tarea, no solo se configura un entorno funcional sino que también se exploran las posibilidades que ofrece este ecosistema para el desarrollo backend.
 
 ---
 
@@ -21,146 +21,204 @@ Esta experiencia de laboratorio permite al estudiante no solo comprender la estr
 
 ### Objetivo General
 
-Implementar un entorno funcional para consultas avanzadas en MongoDB y establecer relaciones entre colecciones utilizando Mongoose y Docker, con el fin de comprender su funcionamiento y aplicabilidad en proyectos distribuidos.
+Implementar y ejecutar consultas avanzadas en una base de datos MongoDB utilizando Node.js y Docker, integrando modelos de datos con relaciones entre colecciones mediante Mongoose.
 
 ### Objetivos Específicos
 
-1. Configurar un entorno de desarrollo basado en contenedores Docker para levantar MongoDB y Mongo Express, facilitando la administración y visualización de datos.
-2. Desarrollar e implementar consultas avanzadas en MongoDB utilizando Mongoose, incluyendo agregaciones, filtros complejos y relaciones entre colecciones.
+1. Diseñar e implementar un modelo de datos relacional en MongoDB, estructurado a través de colecciones y referencias adecuadas.
+2. Realizar consultas complejas sobre la base de datos empleando operadores avanzados y mecanismos de agregación.
 
 ---
 
 ## Entorno de Desarrollo
 
-Para esta práctica se implementó un entorno basado en contenedores con `Docker Compose`. Se levantaron dos servicios principales: `mongo` (la base de datos) y `mongo-express` (una interfaz web para interactuar con la base de datos de forma visual). Se estableció un volumen para persistir los datos. A continuación, se detallan los pasos realizados:
+El entorno de desarrollo fue construido utilizando contenedores con Docker Compose para facilitar el levantamiento y gestión de los servicios. Se desplegaron los siguientes componentes:
 
-Primero, se instaló Docker Desktop en el sistema operativo Windows 10. Luego se creó el archivo `docker-compose.yml` y se definieron los servicios. Para levantar el entorno, se usó el comando:
+* MongoDB como base de datos principal.
+* Mongo Express como interfaz gráfica web para gestionar la base de datos de manera visual.
 
-**docker-compose up -d**
+**Pasos para levantar el entorno:**
 
-Una vez activos los servicios, se accedió a Mongo Express desde el navegador en el puerto 8081 para gestionar visualmente las colecciones.
+Se creó un archivo `docker-compose.yml` con los servicios necesarios. El levantamiento se realizó usando el comando: `docker-compose up -d`.
 
-Posteriormente, se instaló el entorno Node.js con las siguientes dependencias:
+Se instalaron las siguientes dependencias en el proyecto de Node.js:
 
 * mongoose
 * dotenv
 * express
 
-Estas se instalaron mediante el uso de npm con el comando:
+Estas herramientas permitieron manejar la conexión a la base de datos, definir esquemas, y probar consultas desde una API REST.
 
-**npm install mongoose dotenv express**
+## 🔧 Estructura del Proyecto
+
+```plaintext
+.
+├── src/
+│   ├── database/
+│   │   └── connection.js        # Conexión a MongoDB
+│   ├── models/
+│   │   └── Course.js            # Modelo de curso
+│   ├── routes/
+│   │   └── courses.js           # Rutas del backend
+│   ├── insertDatos.js          # Inserta datos de prueba
+│   ├── consultas.js            # Ejecuta consultas sobre la BD
+│   └── index.js                # Punto de entrada del backend
+├── docker-compose.yml          # Define contenedor MongoDB
+├── README.md
+```
+
+**Figura 1. Estructura del proyecto**
 
 ---
 
 ## Modelado de Datos
 
-El modelo de datos elegido para esta práctica simula una aplicación de gestión de productos y usuarios. Se diseñaron las siguientes colecciones:
+El modelo de datos diseñado contiene múltiples relaciones. Se definieron tres colecciones principales: `Usuarios`, `Cursos` y `Inscripciones`.
 
-* **Usuarios**: con campos como nombre, email, y una relación hacia productos favoritos.
-* **Productos**: con campos como nombre, precio, categoría y disponibilidad.
+* La colección **Usuarios** contiene información básica del usuario.
+* La colección **Cursos** contiene datos del curso ofrecido.
+* La colección **Inscripciones** referencia a ambos: usuarios y cursos, estableciendo una relación muchos a muchos.
 
-Se trabajaron tanto relaciones referenciadas como documentos embebidos, lo que permitió evaluar distintos enfoques del modelado en MongoDB.
+Se optó por el uso de referencias (ObjectId) entre colecciones para poder hacer uso de `.populate()` y así consultar los datos relacionados de forma sencilla y eficiente.
+
 
 **Estructura y Relaciones:**
 
 * Un usuario puede tener varios productos favoritos → relación uno a muchos (referenciada).
 * Un producto puede tener múltiples reseñas como documentos embebidos → relación uno a muchos (anidada).
 
-**\[Fotografía 1: Diagrama de relación entre colecciones]**
-![grafico1](https://imgur.com/iG7ee7J.png)
+**Figura 2. Diagrama de relación entre colecciones**
+
+![grafico2](https://imgur.com/iG7ee7J.png)
+
 ---
+## Inserción de Datos Iniciales
+
+Se desarrolló el script insertData.js con el propósito de poblar la base de datos con registros de prueba representativos. Este archivo realiza los siguientes pasos de forma secuencial:
+
+- Elimina todos los documentos existentes de las colecciones involucradas para garantizar un entorno limpio.
+
+- Inserta usuarios con distintos roles predefinidos (ej. docentes, encargados).
+
+- Crea laboratorios de ejemplo con sus respectivas configuraciones.
+
+- Asocia equipos a los laboratorios creados, simulando el inventario real.
+
+- Este proceso facilita las pruebas y la visualización funcional del sistema completo desde el frontend.
+
+
+![grafico3](https://imgur.com/0v4fEHA.png)
+
+![grafico4](https://imgur.com/9yd0YO7.png)
+
+### Figura 3.Códifo de insertData.js y su ejecución exitosa
 
 ## Desarrollo de Consultas
 
-Durante la práctica se implementaron diferentes tipos de consultas utilizando Mongoose. Estas incluyeron:
+Durante el desarrollo se probaron múltiples consultas utilizando tanto MongoDB directamente desde la terminal, como a través de Mongoose en Node.js.
 
-**Filtrado y proyección:**
+Entre las operaciones implementadas se encuentran:
 
-* Buscar productos con un precio mayor a 100.
-* Mostrar únicamente el nombre y precio de los productos.
+* Filtrado por campos específicos (nombre, edad, curso).
+* Proyección de campos particulares.
+* Ordenamiento ascendente y descendente.
+* Operadores como `$in`, `$gte`, `$regex`, `$exists`.
+* Agregaciones mediante `aggregate()` para contar registros, agrupar por campos o calcular promedios.
 
-**Ordenamiento:**
+También se integró el uso de `.populate()` para hacer relaciones efectivas entre documentos y acceder a los datos de forma anidada.
 
-* Ordenar productos de forma ascendente por nombre.
-* Ordenar usuarios por fecha de creación descendente.
+### Figura 4. Resultados en Mongo Express de Consultas
 
-**Operadores avanzados:**
+![grafico5](https://imgur.com/YVOrah3.png)
 
-* `$in` para buscar productos dentro de un conjunto de categorías.
-* `$gte` para filtrar precios mayores o iguales.
-* `$regex` para encontrar coincidencias en texto parcial (nombres).
-* `$exists` para verificar campos opcionales.
+### Figura 5. Resultado desde Node.js
 
-**Agregaciones con `aggregate`:**
+![grafico6](https://imgur.com/LA3ptYQ.png)
 
-* Se calculó el precio promedio por categoría.
-* Se filtraron productos con más de una reseña.
-
-**\[Fotografía 2: Resultados de consultas en Mongo Express]**
 
 ---
 
-## Relaciones entre Colecciones
+## Consultas y resultados obtenidos
 
-Se aplicó el método `.populate()` de Mongoose para realizar referencias cruzadas entre colecciones. Esta técnica permitió traer los datos completos de los productos favoritos de un usuario desde su propia colección, evitando múltiples consultas manuales.
+- Resultados obtenido de todos los usuarios enlistados.
 
-Ejemplo:
+![grafico7](https://imgur.com/muCOMir.png)
 
-* Al consultar un usuario, se utilizaron las referencias para incluir los detalles de los productos marcados como favoritos directamente en la respuesta.
+![grafico8](https://imgur.com/1xdBnvR.png)
 
-También se exploraron relaciones embebidas con subdocumentos, especialmente útil para anidar reseñas dentro de productos sin crear una colección aparte.
+### Figura 6. Resultado desde Node.js
 
-**\[Fotografía 3: Resultado de populate mostrando productos favoritos de un usuario]**
+- Equipos disponibles con su laboratorio
+
+![grafico9](https://imgur.com/AzOv6BH.png)
+
+![grafico10](https://imgur.com/MEBWKBV.png)
+
+### Figura 7. Resultado de equipos disponibles
+
+- Usuarios con correo @universidad.edu
+
+![grafico11](https://imgur.com/37cctO7.png)
+
+![grafico12](https://imgur.com/OKhYKTv.png)
+
+### Figura 8. Resultado de usuarios con @universidad
+
+- Promedio de equipos por laboratorio
+
+![grafico13](https://imgur.com/muCOMir.png)
+
+![grafico14](https://imgur.com/1xdBnvR.png)
+
+### Figura 9. Resultado de promedios
+
+
 
 ---
 
 ## Instrucciones de Ejecución
 
-1. Crear el archivo `docker-compose.yml` con los servicios mongo y mongo-express.
-2. Ejecutar el comando: **docker-compose up -d**.
-3. Acceder a la interfaz web de Mongo Express en: **[http://localhost:8081](http://localhost:8081)**.
-4. Para ejecutar las consultas en Node.js:
-
-   * Crear un archivo `app.js`.
-   * Conectar a MongoDB usando Mongoose.
-   * Definir esquemas y modelos.
-   * Ejecutar los métodos de consulta y mostrar resultados en consola.
-
-**\[Fotografía 4: Consola de Node.js mostrando resultados de consultas]**
+1. Asegúrese de tener Docker instalado.
+2. Posicionarse en el directorio del proyecto y ejecutar:
+   docker-compose up -d
+3. Verificar el acceso a Mongo Express en el puerto 8081.
+4. Desde el backend en Node.js, ejecutar las consultas mediante endpoints definidos en Express o directamente desde consola con Node.
 
 ---
 
 ## Capturas de Pantalla
 
-* Diagrama de estructura de colecciones y relaciones.
-* Mongo Express mostrando las consultas.
-* Consola de Node.js mostrando resultados de las agregaciones y filtros.
+### Docker corriendo
 
-Estas imágenes permiten evidenciar el funcionamiento correcto de la base de datos, la ejecución de consultas complejas y la correcta visualización de datos relacionados.
+![grafico5](https://imgur.com/c9IZw9D.png)
+
+### Acceso a Mongo Express
+
+![grafico6](https://imgur.com/26d5kfb.png)
 
 ---
 
 ## Conclusiones
 
-1. Esta práctica permitió comprender en profundidad cómo funcionan las consultas avanzadas y las relaciones en bases de datos NoSQL, lo cual representa una habilidad esencial para cualquier desarrollador backend que trabaje con estructuras dinámicas de datos. El uso de Mongoose facilitó la implementación de modelos y consultas, ofreciendo una abstracción potente sobre la sintaxis nativa de MongoDB.
+1. **Durante el desarrollo de esta práctica se reafirmó la importancia de estructurar de forma adecuada los datos, especialmente cuando se trabaja con múltiples colecciones relacionadas.** El uso de referencias en MongoDB facilita el mantenimiento y la escalabilidad del sistema, además de hacer más claras las relaciones y dependencias entre documentos.
 
-2. La utilización de Docker como entorno de desarrollo resultó altamente beneficiosa, ya que permitió replicar de forma consistente el entorno entre diferentes equipos y evitar problemas de configuración local. La integración con Mongo Express permitió validar visualmente los datos y acelerar la depuración.
+2. **El uso de herramientas modernas como Docker y Mongo Express permitió simular un entorno real de producción y facilitó enormemente la gestión de la base de datos.** Docker Compose simplificó la configuración inicial, evitando errores comunes y permitiendo que el entorno se levante en pocos minutos.
 
-3. Las relaciones entre colecciones, tanto referenciadas como embebidas, abren múltiples posibilidades en el diseño de aplicaciones. La experiencia de usar `.populate()` evidenció su utilidad para consultas cruzadas eficientes, mientras que los subdocumentos demostraron ser ideales para estructuras internas y acopladas.
+3. **La integración de consultas avanzadas con Mongoose resultó una experiencia enriquecedora, ya que permite trabajar a un alto nivel de abstracción sin perder el control sobre los datos.** El uso de agregaciones, operadores y métodos como populate mostró el verdadero poder de MongoDB para representar estructuras complejas de datos.
 
 ---
 
 ## Recomendaciones
 
-1. Se sugiere documentar cada consulta realizada para futuras referencias y mantenimiento.
-2. Validar los datos antes de insertar documentos para mantener la integridad del modelo.
-3. Usar archivos `.env` para gestionar credenciales y configuraciones del entorno de manera segura.
+* Documentar bien cada esquema y relación antes de implementarlos.
+* Siempre probar las consultas primero desde la terminal o Mongo Express antes de llevarlas a código.
+* Usar `.populate()` solo cuando sea estrictamente necesario, ya que puede afectar el rendimiento en colecciones grandes.
 
 ---
 
 ## Referencias
 
-* MongoDB Official Documentation: [https://www.mongodb.com/docs/](https://www.mongodb.com/docs/)
-* Mongoose Docs: [https://mongoosejs.com/docs/](https://mongoosejs.com/docs/)
+* MongoDB Official Docs: [https://www.mongodb.com/docs/](https://www.mongodb.com/docs/)
+* Mongoose Documentation: [https://mongoosejs.com/docs/guide.html](https://mongoosejs.com/docs/guide.html)
 * Docker Docs: [https://docs.docker.com/](https://docs.docker.com/)
 * Mongo Express GitHub: [https://github.com/mongo-express/mongo-express](https://github.com/mongo-express/mongo-express)
